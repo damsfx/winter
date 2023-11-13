@@ -357,6 +357,7 @@ return [
     'reorder' => [
         'default_title' => 'Reorder records',
         'no_records' => 'There are no records available to sort.',
+        'success' => ':name successfully reordered.',
     ],
     'model' => [
         'name' => 'Model',

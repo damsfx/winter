@@ -1,6 +1,7 @@
 <?php namespace Backend\Behaviors;
 
 use Db;
+use Flash;
 use Lang;
 use Request;
 use Form as FormHelper;
@@ -225,6 +226,21 @@ class RelationController extends ControllerBehavior
 
         $this->addJs('js/winter.relation.js', 'core');
         $this->addCss('css/relation.css', 'core');
+
+        /**
+         * Determine if list widget needs reorder scripts
+         */
+        $listConfig = $controller->listGetConfig();
+        $class = $listConfig->modelClass;
+        $modelClassHasSortableRelations = in_array(
+            \Winter\Storm\Database\Traits\HasSortableRelations::class,
+            class_uses_recursive($class)
+        );
+
+        if ($modelClassHasSortableRelations) {
+            $this->addJs('vendor/sortable/Sortable.min.js', 'core');
+            $this->addJs('js/winter.relation.reorder.js', 'core');
+        }
 
         /*
          * Build configuration
@@ -1434,6 +1450,30 @@ class RelationController extends ControllerBehavior
         }
 
         return ['#'.$this->relationGetId('view') => $this->relationRenderView()];
+    }
+
+    /**
+     * Set sorting order of relation
+     */
+    public function onRelationReorder($id)
+    {
+        $model = $this->controller->formFindModelObject($id);
+        if ($model and $fieldName = request('fieldName')) {
+            $records = request('rcd');
+            $controllerTitle = $this->makeConfig($this->controller->listConfig, [])->title;
+
+            $model->setRelationOrder($fieldName, $records, range(1, count($records)));
+
+            Flash::success(
+                trans(
+                    'backend::lang.reorder.success',
+                    ['name' => trans($controllerTitle)]
+                )
+            );
+
+            $this->controller->initRelation($model, $fieldName);
+            return $this->controller->relationRefresh($fieldName);
+        }
     }
 
     //

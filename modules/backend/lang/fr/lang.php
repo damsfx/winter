@@ -355,6 +355,7 @@ return [
     'reorder' => [
         'default_title' => 'Réorganiser les enregistrements',
         'no_records' => 'Il n\'y a aucun enregistrement à trier.',
+        'success' => ':name réordonné(e)s avec succès.',
     ],
     'model' => [
         'name' => 'Modèle',
